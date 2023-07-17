@@ -1,0 +1,10 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <semaphore.h>
+
+using namespace std;
+
+const int SEDIE 3;
+const int STUDENTI 5;
