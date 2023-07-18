@@ -38,7 +38,7 @@ int main(int argc, char const *argv[]){
 		sleep(1);
 	} else{
 		totStudenti = STUDENTI;
-		cout<<"\tCaricamento completato di "<< STUDENTI <<" studenti."<<endl;
+		cout<<"\tCaricamento completato di "<< totStudenti <<" studenti."<<endl;
 		sleep(1);
 	}
 	cout<<"\n ---------------- Programma in esecuzione ----------------\n "<<endl;
@@ -86,7 +86,6 @@ void *threadTeachingAssistant(void *){
 void *threadStudente(void* IDStudente){
 	int id = *(int*)IDStudente;
 	while(true){
-		//cout<<"Lo studente "<< id <<" sta programmando "<<endl;
 		int tempo = rand() % 5;
 		sleep(tempo);
 		pthread_mutex_lock(&mutex);
