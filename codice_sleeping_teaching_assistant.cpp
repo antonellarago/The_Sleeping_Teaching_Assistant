@@ -8,7 +8,7 @@
 using namespace std;
 
 const int NUM_SEDIE = 3;
-const int STUDENTI = 5;
+const int STUDENTI = 8;
 
 sem_t semaforoStudenti;
 sem_t semaforoTeaching;
@@ -55,8 +55,18 @@ void *threadTeachingAssistant(void *){
 			dorme = false;
 			sem_wait(&semaforoStudenti);
 			pthread_mutex_lock(&mutex);
-			int tempo = rand() % 3;
-			cout<<"Lo studente : "<<sedie[successivo]<<" ora e' entrato nello studio.";
-		}
+			int tempo = rand() % 8;
+			cout<<"Lo studente : "<<sedie[successivo]<<" ora e' entrato nello studio.\n";
+			studentiInAttesa--;
+			cout<<"Lo studente ha aspettato "<<studentiInAttesa<<" studente/i prima di entrare."<<endl;
+			sedie[successivo] = 0;
+			successivo = (successivo + 1) % NUM_SEDIE;
+			sleep(tempo);
+			pthread_mutex_unlock(&mutex);
+			sem_post(&semaforoTeaching);
+			} else if(!dorme){
+				cout<<"Non ci sono studenti che hanno bisogno di aiuto. L'assistente puo' riposare"<<endl;
+				dorme = true;
+			}
 	}
 }
