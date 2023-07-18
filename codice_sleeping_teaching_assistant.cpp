@@ -22,6 +22,7 @@ int sedie[NUM_SEDIE];
 int pos = 0;
 
 void *threadTeachingAssistant(void*);
+void *threadStudente(void* IDStudente);
 
 int main(int argc, char const *argv[]){
 	int totStudenti;
@@ -36,7 +37,7 @@ int main(int argc, char const *argv[]){
 		cout<<"Caricamento completato degli studenti di default"<<endl;
 		sleep(1);
 	}
-	cout<<"Programma in esecuzione..."<<endl;
+	cout<<"---------------- Programma in esecuzione ----------------"<<endl;
 	sleep(1);
 	int identificatoriStudenti[totStudenti];
 	pthread_t studenti[totStudenti];
@@ -45,8 +46,15 @@ int main(int argc, char const *argv[]){
 	sem_init(&semaforoTeaching, 0, 1);
 	pthread_mutex_init(&mutex, NULL);
 	pthread_create (&teaching_assistant, NULL, threadTeachingAssistant, NULL);
-
-	
+	for (int i = 0; i < totStudenti; ++i){
+		identificatoriStudenti[i] = i + 1;
+		pthread_create(&studenti[i], NULL, threadStudente, (void*)&identificatoriStudenti[i]);
+	}
+	pthread_join(teaching_assistant, NULL);
+	for (int i = 0; i < totStudenti; ++i){
+		pthread_join(studenti[i], NULL);
+	}
+	return 0;
 }
 
 void *threadTeachingAssistant(void *){
@@ -56,7 +64,7 @@ void *threadTeachingAssistant(void *){
 			sem_wait(&semaforoStudenti);
 			pthread_mutex_lock(&mutex);
 			int tempo = rand() % 8;
-			cout<<"Lo studente : "<<sedie[successivo]<<" ora e' entrato nello studio.\n";
+			cout<<"Lo studente "<<sedie[successivo]<<" ora e' entrato nello studio."<< endl;
 			studentiInAttesa--;
 			cout<<"Lo studente ha aspettato "<<studentiInAttesa<<" studente/i prima di entrare."<<endl;
 			sedie[successivo] = 0;
@@ -64,9 +72,32 @@ void *threadTeachingAssistant(void *){
 			sleep(tempo);
 			pthread_mutex_unlock(&mutex);
 			sem_post(&semaforoTeaching);
-			} else if(!dorme){
-				cout<<"Non ci sono studenti che hanno bisogno di aiuto. L'assistente puo' riposare"<<endl;
-				dorme = true;
-			}
+		} else if(!dorme){
+			cout<<"Non ci sono studenti che hanno bisogno di aiuto. L'assistente puo' riposare"<<endl;
+			dorme = true;
+		}
+	}
+}
+
+void *threadStudente(void* IDStudente){
+	int id = *(int*)IDStudente;
+	while(true){
+		//cout<<"Lo studente "<< id <<" sta programmando "<<endl;
+		int tempo = rand() % 5;
+		sleep(tempo);
+		pthread_mutex_lock(&mutex);
+		if(studentiInAttesa < NUM_SEDIE){
+			sedie[pos] = id;
+			studentiInAttesa++;
+			pos = (pos + 1) % NUM_SEDIE;
+			cout<<"Lo studente " << id << " ha bisogno di aiuto e sta aspettando in sala di attesa \n";
+			cout<<"In totale ci sono " << studentiInAttesa << "studenti in attesa \n";
+			pthread_mutex_unlock(&mutex);
+			sem_post(&semaforoStudenti);
+			sem_wait(&semaforoTeaching);
+		} else {
+			pthread_mutex_unlock(&mutex);
+			cout<<"***OPS, sono terminati i posti in sala di attesa. Lo studente" << id << " tornerà più tardi \n";
+		}
 	}
 }
