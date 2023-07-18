@@ -1,18 +1,1 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <pthread.h>
-#include <semaphore.h>
-
-using namespace std;
-
-const int NUM_SEDIE = 3;
-const int STUDENTI = 5;
-
-int next = 0;
-int studentiInAttesa = 0;
-int pos = 0;
-boolean dorme = false;
-int sedie[NUM_SEDIE];
-
 
